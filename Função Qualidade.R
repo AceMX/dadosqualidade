@@ -1,20 +1,37 @@
-qualidade <- function(arq1,max,min,x,y) 
-#arq1 é o DataFrame com o conjunto de dados // x é a coluna que contem os dados a serem analisados // y é a quantidade de colunas no DF arq1
+# ImpossÃ­vel climatologicamente Verifica se o registro estÃ¡ fora de limites fÃ­sicos#
+# x Ã© a coluna inicial dos dados, jÃ¡ que o DF pode conter coluna de data
+# df1 Ã© o DataFrame com os limites a serem analisÃ¡dos
+# limite Ã© o DF de retorno da funÃ§Ã£o
+fisico <- function(arq1,df1,x)
 {
-  arq1$Flag1 <- 0
-  arq1$Flag2 <- 0
-  arq1$sd <- 0
-  
-  # Impossível climatologicamente Verifica se o registro está fora de limites físicos#
-  for (i in 1:nrow(arq1))
+  limite <- arq1
+  z<-1
+  y<-1
+  h<-ncol(arq1)
+  c<-h+1
+  limite[,c]<-0
+  for (j in x:h)
   {
-    if (arq1[i,x] > max || arq1[i,x] < min)
+    for (i in 1:nrow(arq1))
     {
-      arq1[i,y+1] <- 1;
+      if (arq1[i,j] > df1[z,y+1] || arq1[i,j] < df1[z,y])
+      {
+        limite[i,c] <- 1
+      }
+    }
+    z<-z+1
+    c<-c+1
+    if (j+1 <= h)
+    {
+      limite[,c]<-0
     }
   }
-  
-  # Valores iguais ou zerados, pode indicar algum problema de operação do equipamento #
+  return(limite)
+}
+####################################################################################################
+
+
+  # Valores iguais ou zerados, pode indicar algum problema de operaÃ§Ã£o do equipamento #
   for (i in 1:(nrow(arq1)-1))
   {
     if (arq1[i,x] == arq1[i+1,x])
@@ -34,7 +51,7 @@ qualidade <- function(arq1,max,min,x,y)
     }
   }
   
-  # Verificação de possíveis outliers por Desvio Padrão #
+  # VerificaÃ§Ã£o de possÃ­veis outliers por Desvio PadrÃ£o #
   for (i in 1:(nrow(arq1)))
   {
     dp <- sd(arq1[,x]);
@@ -53,7 +70,7 @@ qualidade <- function(arq1,max,min,x,y)
   return(arq1)
 }
 
-# Análise de quantidade de registros esperados pelo registrado #
+# AnÃ¡lise de quantidade de registros esperados pelo registrado #
 
 dias <- 730
 leit_hora <- (60/30)
@@ -72,9 +89,9 @@ Percent <- round(((dados*100)/qtde_dados),2)
 teste2 <- teste
 teste <- arq1
 
-### Verificar quais datas estã com registro falho ###
+### Verificar quais datas estÃ£ com registro falho ###
 
-int_medida <- 3#48 # Quantidade de medidas diárias esperada #
+int_medida <- 3#48 # Quantidade de medidas diÃ¡rias esperada #
 lista <- NA
 i <- 1 
 c <- 2 # Coluna com a data
