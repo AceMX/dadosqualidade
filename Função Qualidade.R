@@ -30,27 +30,44 @@ fisico <- function(arq1,df1,x)
 }
 ####################################################################################################
 
-
-  # Valores iguais ou zerados, pode indicar algum problema de operação do equipamento #
-  for (i in 1:(nrow(arq1)-1))
+# Verificação de valores zerados ou iguais consecutivos #
+equalval <- function(arq1,zero,x)
+{
+  zerado <- arq1
+  h<-ncol(arq1)+1
+  z<-1 # z e y controlam o andamento do DF de valores zerados informado #
+  y<-1
+  for(j in x:ncol(arq1))
   {
-    if (arq1[i,x] == arq1[i+1,x])
+    for (i in 1:(nrow(arq1)-1))
     {
-      arq1[i+1,y+2] <- 1;
-    }
-    if (arq1[i,x] == 0)
-    {
-      arq1[i,y+2] <- 1;
-    }
-    if (i == (length(arq1)-1))
-    {
-      if (arq1[i,x] == 0)
+      ## Verifica se os valores são zerados ##
+      if (arq1[i,j] == zero[z,y])
       {
-        arq1[i,y+2] <- 1;
+        zerado[i,h] <- 2
+        next
+      }
+      if (i == (length(arq1)-1))
+      {
+        if (arq1[i,j] == zero[z,y])
+        {
+          zerado[i,h] <- 2
+        }
+      }
+      ## Verifica se os valores são iguais ao próximo ##
+      if (arq1[i,j] == arq1[i+1,j])
+      {
+        zerado[i+1,h] <- 1
       }
     }
+    
+      h<-h+1 ## Incrementa o índice para criar a próxima coluna para aplicar a marcação da verificação ##
+      z<-z+1 ## Incrementa o índice para comprar o zerado da próxima variável ##
   }
-  
+  return(zerado)
+}
+#######################################################################################
+
   # Verificação de possíveis outliers por Desvio Padrão #
   for (i in 1:(nrow(arq1)))
   {
