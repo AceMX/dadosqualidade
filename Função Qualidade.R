@@ -29,6 +29,7 @@ fisico <- function(arq1,df1,x)
   return(limite)
 }
 ####################################################################################################
+
 ########### Verificação de valores zerados ou iguais consecutivos ###################
 equalval <- function(arq1,zero,x)
 {
@@ -66,6 +67,7 @@ equalval <- function(arq1,zero,x)
   return(zerado)
 }
 #######################################################################################
+
 ################### Verificação de Outliers ############################
 outlier <- function(arq1,x) #x é a variável para identificar a partir de qual coluna a análise deve acontecer #
 {
@@ -83,64 +85,50 @@ outlier <- function(arq1,x) #x é a variável para identificar a partir de qual 
 }
 #######################################################################
 
-# Análise de quantidade de registros esperados pelo registrado #
-
-dias <- 730
-leit_hora <- (60/30)
-leit_dia <- (leit_hora*24)
-qtde_dados <- (leit_dia*dias)
-
-new <- do.call(rbind, strsplit(as.character(new[,3])," "))
-temp$Ano <- new[,1]
-
-cj_analise <- subset(temp, Ano=='2016', select = c(V1,V2,V2,V3,V4,V5,Ano))
-
-dados <- nrow(cj_analise)
-
-Percent <- round(((dados*100)/qtde_dados),2)
-
-teste2 <- teste
-teste <- arq1
-
-### Verificar quais datas estã com registro falho ###
-
-int_medida <- 3#48 # Quantidade de medidas diárias esperada #
-lista <- NA
-i <- 1 
-c <- 2 # Coluna com a data
-while (i < nrow(teste))
+###### Verificar quais datas estão com registro falho ######
+falha <- function(arq1,dat,med)
 {
-  cont <- 0
-  j <- i
-  while (teste[i,c] == teste[j,c])
+  
+  int_medida <- med # Quantidade de medidas diárias esperada #
+  lista <- NA # Cria lista de datas com número de registros incompletos #
+  i <- 1 
+  c <- dat # Coluna com a data
+  while (i < nrow(arq1))
   {
-    cont <- cont+1
-    j <- j+1
-    if (is.na(teste[j,1]))
+    cont <- 0
+    j <- i
+    while (arq1[i,c] == arq1[j,c])
     {
-      if (cont != int_medida)
+      cont <- cont+1 # Contador de registros no dia #
+      j <- j+1
+      if (is.na(arq1[j,c]))
       {
-        if (lista == 0)
+        if (cont != int_medida)
         {
-          lista <- teste[j,]
+          if (lista == 0)
+          {
+            lista <- arq1[j,c]
+          }
+          if (lista != 0)
+          {
+            lista <- rbind(lista,arq1[j,c])
+          }
         }
-        if (lista != 0)
-        {
-          lista <- rbind(lista,teste[j,])
-        }
+        break
       }
-      break
     }
-  }
-  if (cont != int_medida)
-  {
-    if (is.na(lista))
+    if (cont != int_medida) # Se encontrou intervalo de data com menos medidas que o esperado #
     {
-      lista <- teste[j-1,]
-    }else
-    {
-      lista <- rbind(lista,teste[j-1,])
+      if (is.na(lista)) # Verifica se a lista de falhas está vazia #
+      {
+        lista <- arq1[j-1,c] # lista de ocorrência recebe o registro anterior, identificando o dia com falta de dados #
+      }else
+      {
+        lista <- rbind(lista,arq1[j-1,c])
+      }
     }
+    i<-j
   }
-  i<-j
+  return(data.frame(lista)) # retorna o DF com a lista de datas com falta de dados #
 }
+###############################################################
