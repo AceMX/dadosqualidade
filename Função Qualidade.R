@@ -29,8 +29,7 @@ fisico <- function(arq1,df1,x)
   return(limite)
 }
 ####################################################################################################
-
-# Verificação de valores zerados ou iguais consecutivos #
+########### Verificação de valores zerados ou iguais consecutivos ###################
 equalval <- function(arq1,zero,x)
 {
   zerado <- arq1
@@ -67,25 +66,22 @@ equalval <- function(arq1,zero,x)
   return(zerado)
 }
 #######################################################################################
-
-  # Verificação de possíveis outliers por Desvio Padrão #
-  for (i in 1:(nrow(arq1)))
+################### Verificação de Outliers ############################
+outlier <- function(arq1,x) #x é a variável para identificar a partir de qual coluna a análise deve acontecer #
+{
+  out <- arq1
+  h<-ncol(arq1) # identifica quantas colunas o arquivo passado possui #
+  c<-h+1 # controle para inserir colunas no final do DF de saída #
+  for (j in x:h)
   {
-    dp <- sd(arq1[,x]);
-    md <- mean(arq1[,x]);
-    if (arq1[i,x]<=(md+dp) && arq1[i,x] >= (md-dp))
-    {
-      arq1[i,y+3] <- 1;
-    }else if (arq1[i,x]<=(md+(dp*2)) && arq1[i,x] >= (md-(dp*2)))
-    {
-      arq1[i,y+3] <- 2;
-    }else if (arq1[i,x]<=(md+(dp*3)) && arq1[i,x] >= (md-(dp*3)))
-    {
-      arq1[i,y+3] <- 3
-    }else {arq1[i,y+3] <- 4}
+    dp <- sd(arq1[,j])
+    md <- mean(arq1[,j])
+    out[,c]<-ceiling(abs(arq1[,j]-md)/dp) # realiza o cálculo para identificar a quantas vezes o valor está do desvio padrão do conjunto em análise #
+    c<-c+1
   }
-  return(arq1)
+  return(out)
 }
+#######################################################################
 
 # Análise de quantidade de registros esperados pelo registrado #
 
