@@ -10,11 +10,27 @@ geral = data.frame(ano=integer(),regiao=character(),estado=character(),estacao=c
 
 #ADICIONAR AS COLUNAS SOBRE QUALIDADE DOS DADOS
 resp = data.frame(ano=integer(),regiao=character(),estado=character(),estacao=character(),qtd=integer(),variavel=character(),min=double(),max=double(),media=double(),desvio=double(),zerados=integer(), falhas=integer(), outliers=integer(), stringsAsFactors=FALSE)
-
+idx = 1
+tam = length(arqs)
+anoAnt = 0
 for (arq in arqs){
-  print(arq)
+  print(paste(idx,'de',tam,arq))
+  idx = idx + 1
   metadados = unlist(strsplit(arq,'/'))
   ano = metadados[[1]]
+  if(anoAnt != 0 && anoAnt != ano){
+    print(paste('Salvando',anoAnt,ano))
+    write.table(geral,'geral.csv',dec=',',sep=';',append=TRUE, col.names = !file.exists("geral.csv"),row.names = FALSE,quote=FALSE)
+    write.table(resp,'individual.csv',dec=',',sep=';',append=TRUE, col.names = !file.exists("individual.csv"),row.names = FALSE,quote=FALSE)
+    
+    geral = data.frame(ano=integer(),regiao=character(),estado=character(),estacao=character(),qtd=integer(), stringsAsFactors=FALSE)
+    resp = data.frame(ano=integer(),regiao=character(),estado=character(),estacao=character(),qtd=integer(),variavel=character(),min=double(),max=double(),media=double(),desvio=double(),zerados=integer(), falhas=integer(), outliers=integer(), stringsAsFactors=FALSE)
+  }
+  # if(anoAnt == ano){
+  #   next
+  # }
+  anoAnt = ano
+  
   path = metadados[[2]]
   partes = unlist(strsplit(path,'_'))
   regiao = partes[[2]]
@@ -78,5 +94,5 @@ for (arq in arqs){
   # break
 }
 
-write.csv(geral,'geral.csv',dec=',',sep=';')
-write.csv(resp,'individual.csv',dec=',',sep=';')
+write.table(geral,'geral.csv',dec=',',sep=';',append=TRUE, col.names = !file.exists("geral.csv"),row.names = FALSE,quote=FALSE)
+write.table(resp,'individual.csv',dec=',',sep=';',append=TRUE, col.names = !file.exists("individual.csv"),row.names = FALSE,quote=FALSE)
