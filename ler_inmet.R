@@ -9,7 +9,7 @@ arqs = list.files(folder,pattern='*',recursive=TRUE)
 geral = data.frame(ano=integer(),regiao=character(),estado=character(),estacao=character(),qtd=integer(), stringsAsFactors=FALSE)
 
 #ADICIONAR AS COLUNAS SOBRE QUALIDADE DOS DADOS
-resp = data.frame(ano=integer(),regiao=character(),estado=character(),estacao=character(),qtd=integer(),variavel=character(),min=double(),max=double(),media=double(),desvio=double(),zerados=integer(), stringsAsFactors=FALSE)
+resp = data.frame(ano=integer(),regiao=character(),estado=character(),estacao=character(),qtd=integer(),variavel=character(),min=double(),max=double(),media=double(),desvio=double(),zerados=integer(), falhas=integer(), outliers=integer(), stringsAsFactors=FALSE)
 
 for (arq in arqs){
   print(arq)
@@ -32,17 +32,24 @@ for (arq in arqs){
   for (i in seq(3,length(colunas))) {
     col = colunas[i]
     col = iconv(col,to="ASCII//TRANSLIT")
-    
-    sub = dados[c(1,2)]
-    #falhas = falha2(sub,1,3)
-    res = ftable(sub)
-    soma = rowSums(res)
-    print(colnames(res))
-    #print(res[soma==24,1])
-    break
-    
+
     #A ULTIMA COLUNA É UMA COLUNA VAZIA COM O NOME DE 'X'
     if(col != 'X'){
+      
+      sub = dados[c(1,i)]
+      # print(col)
+      filtro = dados[i] == -9999
+      
+      if(sum(filtro,na.rm = TRUE) > 0){
+        sub[filtro,2] = NA
+      }
+      
+      if(col == 'RADIACAO.GLOBAL..KJ.m..'){
+        falhas = falha2(sub,1,14)
+      }else{
+        falhas = falha2(sub,1,24)
+      }
+      
       x = dados[i]
       #REMOVE OS VALORES IGNORADOS PARA VERIFICAR O MINIMO
       x = x[x != -9999]
@@ -57,14 +64,19 @@ for (arq in arqs){
       # fisicos[nrow(fisicos) + 1,] = c(0,45)
       # fis = fisico2(sub,fisicos,3)
       
+      out = outlier(sub,3)
+      outiers = sum(out[,4] > 3, na.rm = TRUE)
       #ADICIONAR AS COLUNAS SOBRE QUALIDADE DOS DADOS
-      linha = c(ano, regiao, estado, torre,qtd,col,min(x,na.rm = TRUE),max(x,na.rm = TRUE),mean(x,na.rm=TRUE),sd(x,na.rm=TRUE),zerados)
+      linha = c(ano, regiao, estado, torre,qtd,col,min(x,na.rm = TRUE),max(x,na.rm = TRUE),mean(x,na.rm=TRUE),sd(x,na.rm=TRUE),zerados, length(falhas), outiers)
       resp[nrow(resp) + 1,] = linha
-      break
+      
+      # if(i==4){
+      #   break
+      # }
     }
   }
-  break
+  # break
 }
 
-# write.csv(geral,'geral.csv',dec=',',sep=';')
-# write.csv(resp,'individual.csv',dec=',',sep=';')
+write.csv(geral,'geral.csv',dec=',',sep=';')
+write.csv(resp,'individual.csv',dec=',',sep=';')

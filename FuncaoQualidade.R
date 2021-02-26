@@ -123,8 +123,8 @@ outlier <- function(arq1,x) #x é a variável para identificar a partir de qual 
   c<-h+1 # controle para inserir colunas no final do DF de saída #
   for (j in x:h)
   {
-    dp <- sd(arq1[,j])
-    md <- mean(arq1[,j])
+    dp <- sd(arq1[,j],na.rm=TRUE)
+    md <- mean(arq1[,j],na.rm=TRUE)
     out[,c]<-ceiling(abs(arq1[,j]-md)/dp) # realiza o cálculo para identificar a quantas vezes o valor está do desvio padrão do conjunto em análise #
     c<-c+1
   }
@@ -190,10 +190,12 @@ falha2 <- function(arq1,dat,med)
   c <- dat # Coluna com a data
   h = dim(arq1)[2]+1
   res = ftable(arq1)
-  soma = rowSums(res)
+  soma = rowSums(res, na.rm = TRUE)
   
+  colunas = colnames(arq1)
+  dias = levels(sub[[colunas[c]]])
 
-  return (ret)
+  return (dias[soma!=int_medida])
   #return(data.frame(lista)) # retorna o DF com a lista de datas com falta de dados #
 }
 ###############################################################
