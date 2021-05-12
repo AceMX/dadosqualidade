@@ -72,9 +72,10 @@ for (arq in arqs){
       
       #print(col)
       sub = dados[c(1,2,i)]
-      zeros2 = equalval2(sub,c(0),3)
-      
+      zeros2 = equalval2(sub,c(-9999),3)
       zerados = sum(!is.na(zeros2[,4]))
+      
+      sum(!is.na(zeros2[,4]))
       
       # fisicos = data.frame(min=double(),max=double(), stringsAsFactors=FALSE)
       # fisicos[nrow(fisicos) + 1,] = c(0,45)
